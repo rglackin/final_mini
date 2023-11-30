@@ -10,8 +10,8 @@ import staticClasses.Quiz.quizType;
 import other.*;
 
 
-public class QuizScreen implements ActionListener {
-    User u = new User();
+public class QuizScreen extends Screen {
+    //User u = new User();
     Quiz quiz = new Quiz();
     qaBank bank = new qaBank();
     int[] qNums;
@@ -26,6 +26,10 @@ public class QuizScreen implements ActionListener {
     final boolean INCREASING_DIFFICULTY = true;
     final boolean RANDOM = false;
     final String STARTQUIZ = "startQuiz";
+    final String ANS0 = "ANS0";
+    final String ANS1 = "ANS1";
+    final String ANS2 = "ANS2";
+    final String ANS3 = "ANS3";
 
     long startTime = 0;
     // initialising frame and components
@@ -51,9 +55,58 @@ public class QuizScreen implements ActionListener {
     ButtonGroup ansGroup = new ButtonGroup();
 
     public QuizScreen(User u) {
-        this.u = u;
+        super(u);
         quiz.setU(u);
-        
+        // adds components to frame
+        initFrame();
+        // Put constraint on components
+        layoutConstraints();
+        //sets up buttons
+        setupActionListener();
+
+        frame.add(formatPanel);
+        frame.add(quizPanel);
+        frame.pack();
+        frame.setSize(1200, 800);
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        switch (e.getActionCommand()) {
+
+            case STARTQUIZ:
+                if (radIncDiff.isSelected()) {
+                    quiz.setType(quizType.INC_DIFF);
+                    startQuiz(INCREASING_DIFFICULTY);
+                } else if (radRandom.isSelected()) {
+                    quiz.setType(quizType.RAND);;
+                    startQuiz(RANDOM);
+                }else if(radTimed.isSelected()){
+                    quiz.setType(quizType.TIMED);
+                    startQuiz(INCREASING_DIFFICULTY);
+                }
+                 else {
+                    JOptionPane.showMessageDialog(null, "Select a format");
+                }
+                break;
+            case ANS0:
+                nextQuestion(ans0);
+                break;
+            case ANS1:
+                nextQuestion(ans1);
+                break;
+            case ANS2:
+                nextQuestion(ans2);
+                break;
+            case ANS3:
+                nextQuestion(ans3);
+                break;
+        }
+    }
+    @Override
+    void initFrame() {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         // set background color
         formatPanel.setBackground(Color.CYAN);
@@ -96,7 +149,10 @@ public class QuizScreen implements ActionListener {
         // set quiz panel size/layout
         quizPanel.setSize(1200, 800);
         quizPanel.setLayout(layout);
-
+        
+    }
+    @Override
+    void layoutConstraints() {
         // Spring layout constraints
         layout.putConstraint(SpringLayout.HORIZONTAL_CENTER, lblSelectFormat, 0, SpringLayout.HORIZONTAL_CENTER,
                 formatPanel);
@@ -138,68 +194,27 @@ public class QuizScreen implements ActionListener {
         layout.putConstraint(SpringLayout.WEST, lblMarks, 10, SpringLayout.WEST, quizPanel);
         layout.putConstraint(SpringLayout.SOUTH, lblMarks, -10, SpringLayout.SOUTH, quizPanel);
 
-        //layout.putConstraint(SpringLayout.HORIZONTAL_CENTER, lblAStatus, 0, SpringLayout.HORIZONTAL_CENTER, quizPanel);
-        //layout.putConstraint(SpringLayout.VERTICAL_CENTER, lblAStatus, 0, SpringLayout.VERTICAL_CENTER, quizPanel);
-
+        
+    }
+    @Override
+    void setupActionListener() {
         btnStart.addActionListener(this);
-        btnStart.setActionCommand("startQuiz");
+        btnStart.setActionCommand(STARTQUIZ);
 
         btnAnsZero.addActionListener(this);
-        btnAnsZero.setActionCommand("a0");
+        btnAnsZero.setActionCommand(ANS0);
 
         btnAnsOne.addActionListener(this);
-        btnAnsOne.setActionCommand("a1");
+        btnAnsOne.setActionCommand(ANS1);
 
         btnAnsTwo.addActionListener(this);
-        btnAnsTwo.setActionCommand("a2");
+        btnAnsTwo.setActionCommand(ANS2);
 
         btnAnsThree.addActionListener(this);
-        btnAnsThree.setActionCommand("a3");
+        btnAnsThree.setActionCommand(ANS3);
 
-        //lblAStatus.setVisible(false);
-
-        frame.add(formatPanel);
-        frame.add(quizPanel);
-        frame.pack();
-        frame.setSize(1200, 800);
-        frame.setLocationRelativeTo(null);
-        frame.setVisible(true);
+        
     }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        switch (e.getActionCommand()) {
-
-            case STARTQUIZ:
-                if (radIncDiff.isSelected()) {
-                    quiz.setType(quizType.INC_DIFF);
-                    startQuiz(INCREASING_DIFFICULTY);
-                } else if (radRandom.isSelected()) {
-                    quiz.setType(quizType.RAND);;
-                    startQuiz(RANDOM);
-                }else if(radTimed.isSelected()){
-                    quiz.setType(quizType.TIMED);
-                    startQuiz(INCREASING_DIFFICULTY);
-                }
-                 else {
-                    JOptionPane.showMessageDialog(null, "Select a format");
-                }
-                break;
-            case "a0":
-                nextQuestion(ans0);
-                break;
-            case "a1":
-                nextQuestion(ans1);
-                break;
-            case "a2":
-                nextQuestion(ans2);
-                break;
-            case "a3":
-                nextQuestion(ans3);
-                break;
-        }
-    }
-
     public void startQuiz(boolean incOrRand) {
         formatPanel.setVisible(false);
         quizPanel.setVisible(true);
@@ -249,6 +264,9 @@ public class QuizScreen implements ActionListener {
         }
 
     }
+    
+
+
     public void endQuiz(){
         quiz.setMark(marks);
         if(quiz.getType()==quizType.TIMED){
