@@ -1,16 +1,25 @@
 package staticClasses;
 
 import other.*;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.Scanner;
 
 public class Quiz {
     private User u;
-    private int quizType, mark; // quiztype 0 = inc difficulty, 1 = random, 2 = timed
+    private int mark; // quiztype 0 = inc difficulty, 1 = random, 2 = timed
     private double time;
+    public enum quizType{
+        INC_DIFF,
+        RAND,
+        TIMED
+    }
+    private quizType type;
+
+    public quizType getType() {
+        return type;
+    }
+
+    public void setType(quizType type) {
+        this.type = type;
+    }
 
     public User getU() {
         return u;
@@ -20,7 +29,7 @@ public class Quiz {
         this.u = u;
     }
 
-    public int getQuizType() {
+    /*public int getQuizType() {
         return quizType;
     }
 
@@ -28,7 +37,7 @@ public class Quiz {
         if (quizType >= 0 && quizType <= 2) {
             this.quizType = quizType;
         }
-    }
+    }*/
 
     public int getMark() {
         return mark;
@@ -53,15 +62,15 @@ public class Quiz {
     }
 
     public void writeResult() {
-        String pathnameString = "";
-        switch (this.quizType) {
-            case 0:
+        /*String pathnameString = "";
+        switch (type) {
+            case INCREASING_DIFFICULTY:
                 pathnameString = "incDiffResults.txt";
                 break;
-            case 1:
+            case RANDOM:
                 pathnameString = "randResults.txt";
                 break;
-            case 2:
+            case TIMED:
                 writeTimerResult();
                 return;
         }
@@ -83,14 +92,17 @@ public class Quiz {
             }
             reader.close();
 
-            writer.write("\n"+u.getID() + " " + this.getQuizType() + " " + u.getUsername() + " " + this.getMark()+"\n");
+            writer.write("\n"+u.getID() + " " + getType().toString() + " " + u.getUsername() + " " + this.getMark()+"\n");
             writer.close();
         } catch (IOException e) {
             e.printStackTrace();
-        }
+        }*/
+        
+        String query = String.format("INSERT INTO quiz_result (score,quiz_type,user_id,timer) VAlUES (%s,'%s',%s,%s)",mark,type.toString(),u.getID(),time);
+        DAL.InsertQuery(query);
 
     }
-    public void writeTimerResult(){
+    /*public void writeTimerResult(){
         try {
             File myObj = new File("timerResults.txt");
             myObj.createNewFile();
@@ -109,12 +121,12 @@ public class Quiz {
             }
             reader.close();
 
-            writer.write(u.getID() + " " + this.getQuizType() + " " + u.getUsername() + " " + this.getMark() + " " +this.getTime()+"\n");
+            //writer.write(u.getID() + " " + this.getQuizType() + " " + u.getUsername() + " " + this.getMark() + " " +this.getTime()+"\n");
             writer.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
+    }*/
 
     
 

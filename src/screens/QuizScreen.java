@@ -6,16 +6,26 @@ import java.awt.event.*;
 
 import javax.swing.*;
 import staticClasses.*;
+import staticClasses.Quiz.quizType;
 import other.*;
 
 
 public class QuizScreen implements ActionListener {
     User u = new User();
-    Quiz q = new Quiz();
+    Quiz quiz = new Quiz();
     qaBank bank = new qaBank();
     int[] qNums;
     int qPointer = 0;
     int marks = 0;
+
+    Answer ans0;
+    Answer ans1;
+    Answer ans2;
+    Answer ans3;
+
+    final boolean INCREASING_DIFFICULTY = true;
+    final boolean RANDOM = false;
+    final String STARTQUIZ = "startQuiz";
 
     long startTime = 0;
     // initialising frame and components
@@ -42,7 +52,7 @@ public class QuizScreen implements ActionListener {
 
     public QuizScreen(User u) {
         this.u = u;
-        q.setU(u);
+        quiz.setU(u);
         
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         // set background color
@@ -160,32 +170,32 @@ public class QuizScreen implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         switch (e.getActionCommand()) {
 
-            case "startQuiz":
+            case STARTQUIZ:
                 if (radIncDiff.isSelected()) {
-                    q.setQuizType(0);
-                    startQuiz(true);
+                    quiz.setType(quizType.INC_DIFF);
+                    startQuiz(INCREASING_DIFFICULTY);
                 } else if (radRandom.isSelected()) {
-                    q.setQuizType(1);
-                    startQuiz(false);
+                    quiz.setType(quizType.RAND);;
+                    startQuiz(RANDOM);
                 }else if(radTimed.isSelected()){
-                    q.setQuizType(2);
-                    startQuiz(true);
+                    quiz.setType(quizType.TIMED);
+                    startQuiz(INCREASING_DIFFICULTY);
                 }
                  else {
                     JOptionPane.showMessageDialog(null, "Select a format");
                 }
                 break;
             case "a0":
-                nextQuestion(0);
+                nextQuestion(ans0);
                 break;
             case "a1":
-                nextQuestion(1);
+                nextQuestion(ans1);
                 break;
             case "a2":
-                nextQuestion(2);
+                nextQuestion(ans2);
                 break;
             case "a3":
-                nextQuestion(3);
+                nextQuestion(ans3);
                 break;
         }
     }
@@ -193,30 +203,30 @@ public class QuizScreen implements ActionListener {
     public void startQuiz(boolean incOrRand) {
         formatPanel.setVisible(false);
         quizPanel.setVisible(true);
-        if(q.getQuizType()==2){
+        if(quiz.getType()==quizType.TIMED){
             startTime = startTimer();
         }
         qNums = bank.incOrRand(incOrRand);
-        nextQuestion(-1);
+        
+        nextQuestion(null);
     }
 
-    public void nextQuestion(int answerChoice) {
+    public void nextQuestion(Answer answerChoice) {
+        int questionID = 0;
         try {
-            if (answerChoice >= 0) {
-                int correctAns = bank.correctAnswer(qNums[qPointer]);
-                if (answerChoice == correctAns) {
+            Question currentQ = bank.returnQuestionAtPointer(qNums[qPointer]);
+            questionID = currentQ.getQuestionID();
+            if (answerChoice != null) {
+                
+                if (answerChoice.isCorrect()) {
                     marks++;
                     lblMarks.setText("Marks: " + marks);
-                    //lblAStatus.setText("Correct!");
-                    //lblAStatus.setBackground(Color.GREEN);
+                   
                 }
-                
-                //lblAStatus.setVisible(true);
                 qPointer++;
-                
-                //lblAStatus.setVisible(false);
             }
-            lblQuestion.setText("<html><pre>" + bank.returnQuestion(qNums[qPointer]) + "</pre></html>");
+            
+            lblQuestion.setText("<html><pre>" + currentQ.getqString() + "</pre></html>");
         } catch (ArrayIndexOutOfBoundsException e) {
             //end quiz
             endQuiz();
@@ -225,10 +235,14 @@ public class QuizScreen implements ActionListener {
         try {
             btnAnsTwo.setVisible(true);
             btnAnsThree.setVisible(true);
-            btnAnsZero.setText(bank.returnAnswer(qNums[qPointer], 0));
-            btnAnsOne.setText(bank.returnAnswer(qNums[qPointer], 1));
-            btnAnsTwo.setText(bank.returnAnswer(qNums[qPointer], 2));
-            btnAnsThree.setText(bank.returnAnswer(qNums[qPointer], 3));
+            ans0 = bank.returnAnswerAtPointer(questionID, 0); 
+            btnAnsZero.setText(ans0.getAnsString());
+            ans1 = bank.returnAnswerAtPointer(questionID, 1); 
+            btnAnsOne.setText(ans1.getAnsString());
+            ans2 = bank.returnAnswerAtPointer(questionID, 2); 
+            btnAnsTwo.setText(ans2.getAnsString());
+            ans3 = bank.returnAnswerAtPointer(questionID, 3); 
+            btnAnsThree.setText(ans3.getAnsString());
         } catch (ArrayIndexOutOfBoundsException e) {
             btnAnsTwo.setVisible(false);
             btnAnsThree.setVisible(false);
@@ -236,11 +250,11 @@ public class QuizScreen implements ActionListener {
 
     }
     public void endQuiz(){
-        q.setMark(marks);
-        if(q.getQuizType()==2){
+        quiz.setMark(marks);
+        if(quiz.getType()==quizType.TIMED){
             endTimer(startTime);
         }
-        new QuizOver(u,q);
+        new QuizOver(u,quiz);
         frame.dispose();
     }
     public long startTimer() { //method to begin timer
@@ -248,9 +262,10 @@ public class QuizScreen implements ActionListener {
         return startTime;
 	}
 	public  void endTimer(long startTime) { //method to end timer and return elapsed time
+        long secondsDivisor = 1000;
         long endTime = System.currentTimeMillis();
         long elapsedTime = endTime - startTime;
-        q.setTime(elapsedTime / 1000.0); 
+        quiz.setTime(elapsedTime / secondsDivisor); 
 
 	}
 }

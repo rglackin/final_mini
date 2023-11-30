@@ -5,7 +5,7 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import staticClasses.*;
-
+import staticClasses.Quiz.quizType;
 import other.*;
 
 import javax.swing.*;
@@ -13,7 +13,7 @@ import javax.swing.*;
 
 public class QuizOver implements ActionListener {
     User u = new User();
-    Quiz q;
+    Quiz quiz;
     static JFrame frame = new JFrame("Quiz Over");
     JPanel panel = new JPanel();
     SpringLayout layout = new SpringLayout();
@@ -23,16 +23,16 @@ public class QuizOver implements ActionListener {
     JLabel lblTime = new JLabel();
     JLabel lblTitle = new JLabel("Quiz Over");
 
-    public QuizOver(User u, Quiz q) {
+    public QuizOver(User u, Quiz quiz) {
         this.u = u;
-        this.q = q;
-        q.writeResult();
+        this.quiz = quiz;
+        quiz.writeResult();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         panel.setBackground(Color.CYAN);
         lblUsername.setText(lblUsername.getText() + "" + u.getUsername());
-        lblMark.setText("Mark: "+q.getMark()+"/18");
+        lblMark.setText("Mark: "+quiz.getMark()+"/18");
         lblMark.setFont(new Font("", Font.BOLD, 20));
-        lblTime.setText("Time taken: "+q.getTime()+"s");
+        lblTime.setText("Time taken: "+quiz.getTime()+"s");
         lblTime.setFont(new Font("", Font.BOLD, 20));
         lblTitle.setFont(new Font("", Font.BOLD, 20));
         lblUsername.setFont(new Font("", Font.BOLD, 20));
@@ -61,7 +61,7 @@ public class QuizOver implements ActionListener {
         layout.putConstraint(SpringLayout.VERTICAL_CENTER, btnNext, 80, SpringLayout.VERTICAL_CENTER, panel);
 
         
-        if(q.getQuizType()==2){
+        if(quiz.getType()==quizType.TIMED){
             lblTime.setVisible(true);
         }
         else{

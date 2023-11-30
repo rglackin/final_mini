@@ -1,7 +1,9 @@
 package screens;
+
 import javax.swing.*;
 
 import staticClasses.*;
+import staticClasses.Quiz.quizType;
 import other.*;
 
 import java.awt.Color;
@@ -13,29 +15,31 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 public class StatsScreen implements ActionListener {
     User u;
-
+    final String RandString = "RAND";
+    final String TimedString = "TIMED";
+    final String IncDiffString = "INCDIFF";
     static JFrame frame = new JFrame("Statistics");
     JPanel panel = new JPanel();
     SpringLayout layout = new SpringLayout();
 
     JLabel lblTitle = new JLabel("Select a format");
-    //JTable tblStats =new JTable();
+    // JTable tblStats =new JTable();
     JButton btnIncDiff = new JButton("Increasing Difficulty");
     JButton btnRand = new JButton("Random");
     JButton btnTim = new JButton("Timed");
     JButton btnBack = new JButton("Back");
 
-
     public StatsScreen(User u) {
         this.u = u;
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         panel.setBackground(Color.CYAN);
-        
+
         panel.setSize(700, 500);
         panel.setLayout(layout);
-        //panel.add(tblStats);
+        // panel.add(tblStats);
         panel.add(lblTitle);
         panel.add(btnRand);
         panel.add(btnTim);
@@ -54,7 +58,6 @@ public class StatsScreen implements ActionListener {
         layout.putConstraint(SpringLayout.WEST, btnBack, 10, SpringLayout.WEST, panel);
         layout.putConstraint(SpringLayout.SOUTH, btnBack, -10, SpringLayout.SOUTH, panel);
 
-        
         frame.add(panel);
 
         frame.pack();
@@ -62,11 +65,11 @@ public class StatsScreen implements ActionListener {
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
         btnIncDiff.addActionListener(this);
-        btnIncDiff.setActionCommand("incDiff");
+        btnIncDiff.setActionCommand(IncDiffString);
         btnRand.addActionListener(this);
-        btnRand.setActionCommand("rand");
+        btnRand.setActionCommand(RandString);
         btnTim.addActionListener(this);
-        btnTim.setActionCommand("timer");
+        btnTim.setActionCommand(TimedString);
         btnBack.addActionListener(this);
         btnBack.setActionCommand("back");
 
@@ -75,14 +78,14 @@ public class StatsScreen implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         switch (e.getActionCommand()) {
-            case "incDiff":
+            case IncDiffString:
                 setupDataTable("incDiffResults.txt", false);
                 break;
-            case "rand":
-                setupDataTable("randResults.txt",false);
+            case RandString:
+                setupDataTable("randResults.txt", false);
                 break;
-            case "timer":
-                setupDataTable("timerResults.txt",true);
+            case TimedString:
+                setupDataTable("timerResults.txt", true);
                 break;
             case "back":
                 new MenuScreen(u);
@@ -153,5 +156,22 @@ public class StatsScreen implements ActionListener {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        String query = String.format("Select * From quiz_results WHERE quiz_type = '%s'",pathname);
+        
+        Map<Integer, List<Integer>> resultsByUserID = DAL.SelectQuery(query, rset->{
+            Map<Integer, List<Integer>> resultsByUserID = new HashMap<>();
+            while(rset.next()){
+                
+                    int userID = rset.getInt("user_id");
+                    int result = rset.getInt("score")
+                    List<Integer> userResults = resultsByUserID.get(userID);
+                    if (userResults == null) {
+                        userResults = new ArrayList<>();
+                        resultsByUserID.put(userID, userResults);
+                    }
+                    userResults.add(result);
+            }
+            return resultsByUserID;
+        })
     }
 }

@@ -104,8 +104,12 @@ public class LoginScreen implements ActionListener {
     }
     public static void Register(String[] info) {
         if(passRegex.validPassword(info[1])){
-            u.setUserInfo(info);
-            OpenMenu();
+            if(u.setUserInfo(info)){
+                OpenMenu();
+            }else{
+                JOptionPane.showMessageDialog(null, "Registration Unsuccessful, username is taken");
+            }
+            
         }
         else{
             JOptionPane.showMessageDialog(null, "Registration Unsuccessful, password invalid");
